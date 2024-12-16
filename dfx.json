@@ -1,0 +1,36 @@
+{
+    "canisters": {
+      "pionext_backend": {
+        "type": "azle",
+        "main": "src/pionext_backend/index.ts",
+        "candid_gen": "http",
+        "declarations": {
+          "output": "test/dfx_generated/pionext_backend",
+          "node_compatibility": true
+        },
+        "custom": {
+          "experimental": true
+        }
+      },
+      "pionext_frontend": {
+        "dependencies": ["pionext_backend"],
+        "frontend": {
+          "entrypoint": "src/dist/index.html"
+        },
+        "source": [
+          "src/pionext_frontend/dist"
+        ],
+        "type": "assets",
+        "gzip": true,
+        "env": []
+      }
+    },
+    "networks": {
+      "mainnet": {
+        "providers": ["https://icp0.io"],
+        "type": "persistent"
+      }
+    },
+  
+    "output_env_file": ".env"
+  }
