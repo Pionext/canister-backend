@@ -1,9 +1,5 @@
 import { StableBTreeMap } from "azle";
-
-export enum TransactionType {
-  SELL = "sell",
-  PURCHASE = "purchase",
-}
+import { TransactionType } from "../types";
 
 interface Transaction {
   id: string;
@@ -13,12 +9,12 @@ interface Transaction {
   type: TransactionType;
 }
 
-export const transactions = StableBTreeMap<string, Transaction>(0);
+export const Transactions = StableBTreeMap<string, Transaction>(0);
 
 export const getUserTransaction = (userId: string) => {
   const userTransaction: Transaction[] = [];
-  for (const key of transactions.keys()) {
-    const tx = transactions.get(key)!;
+  for (const key of Transactions.keys()) {
+    const tx = Transactions.get(key)!;
 
     if (tx.userId === userId) {
       userTransaction.push(tx);

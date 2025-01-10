@@ -2,19 +2,21 @@ import { Request, Response } from "express";
 import { pionextBalance } from "../storage/pionextBalance";
 import {
   getUserTransaction,
-  transactions,
-  TransactionType,
+  Transactions,
 } from "../storage/transaction";
+import { TransactionType } from "../types";
 
 interface PurchaseRequest {
   userId: string;
   amount: number;
+  transactionId: string
 }
 
 export const purchase = (req: Request, res: Response) => {
   const body = req.body as unknown as PurchaseRequest;
-  const userId = body.userId;
-  const amount = body.amount;
+  const userId = body?.userId;
+  const amount = body?.amount;
+  const transactionId = body?.transactionId;
 
   const userBalance = pionextBalance.get(userId)!;
   if (!userBalance) res.status(404).json({ message: "User not found!" });
@@ -25,7 +27,6 @@ export const purchase = (req: Request, res: Response) => {
     pionextBalance.insert(userId, userBalance);
   }
 
-  const transactionId = `txn_${Date.now()}`;
   const transaction = {
     id: transactionId,
     userId,
@@ -33,7 +34,7 @@ export const purchase = (req: Request, res: Response) => {
     amount,
     timestamp: new Date().toISOString(),
   };
-  transactions.insert(transactionId, transaction);
+  Transactions.insert(transactionId, transaction);
 
   res
     .status(201)

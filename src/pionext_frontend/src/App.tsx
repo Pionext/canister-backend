@@ -1,9 +1,127 @@
-import "./App.css";
+import { useEffect, useState } from 'react';
+import { Activity, Clock, Hash, User, DollarSign } from 'lucide-react';
+
+interface Transaction {
+  id: string;
+  userId: string;
+  amount: number;
+  timestamp: string;
+  type: 'buy' | 'sell';
+}
 
 function App() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [currentPrice] = useState(0.7168);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const types: Transaction['type'][] = ['buy', 'sell'];
+      const newTransaction: Transaction = {
+        id: Math.random().toString(36).substring(7),
+        userId: 'user_' + Math.random().toString(36).substring(7),
+        amount: Math.floor(Math.random() * 1000),
+        timestamp: new Date().toISOString(),
+        type: types[Math.floor(Math.random() * types.length)]
+      };
+
+      setTransactions(prev => [newTransaction, ...prev].slice(0, 50));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="flex items-center justify-center bg-blue-50 h-screen">
-      <img className="animate-spin repeat-infinite" src="/logos/android-chrome-512x512.png" alt="Pionext log" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="border-b border-gray-200 p-4 sticky top-0 z-10 bg-white/95 backdrop-blur-sm">
+        <nav className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center space-x-2">
+            <Activity className="w-6 h-6 text-blue-600" />
+            <span className="text-xl font-bold text-gray-900">PIONEXT</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-4 h-4 text-blue-600" />
+              <span className="text-blue-600 font-medium">{currentPrice} USD</span>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+              <span className="text-sm text-blue-600">JD</span>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto p-8">
+        {/* Transactions Panel */}
+        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Credit Trading Activity</h2>
+            <div className="flex items-center space-x-2 text-sm text-blue-600">
+              <Clock className="w-4 h-4" />
+              <span>Auto-updating every 3s</span>
+            </div>
+          </div>
+          
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            {transactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="group bg-white p-6 rounded-lg transform transition-all duration-500 hover:scale-[1.02] border border-gray-100 hover:border-blue-200 hover:shadow-md"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-4">
+                    <div className={`p-2 rounded-lg ${
+                      tx.type === 'buy' ? 'bg-green-50' : 'bg-red-50'
+                    }`}>
+                      <div className={`capitalize font-medium text-sm ${
+                        tx.type === 'buy' ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {tx.type} Credits
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        <p className="text-sm font-mono text-gray-600">{tx.userId}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-lg font-bold text-blue-600">
+                          {tx.amount.toLocaleString()} Credits
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          ≈ ${(tx.amount * currentPrice).toFixed(2)} USD
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <span>{new Date(tx.timestamp).toLocaleTimeString()}</span>
+                        <span>•</span>
+                        <span className="flex items-center space-x-1">
+                          <Hash className="w-4 h-4" />
+                          <span>{tx.id}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-gray-100 hidden group-hover:block">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">Transaction Type:</span>
+                      <p className="font-medium text-gray-900 capitalize">{tx.type} Credits</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Full Timestamp:</span>
+                      <p className="font-mono text-gray-900">{new Date(tx.timestamp).toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
