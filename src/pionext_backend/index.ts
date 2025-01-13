@@ -12,6 +12,6 @@ app.get("/test", (_, res) => {
   });
 });
 
-app.use("/api", globalRouter);
+app.use("/", globalRouter);
 
 app.listen();
