@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Activity, Clock, Hash, User, DollarSign } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Activity, Clock, Hash, User, DollarSign } from "lucide-react";
+import { fetchTransactions } from "./lib/getTransaction";
 
 interface Transaction {
   id: string;
   userId: string;
   amount: number;
   timestamp: string;
-  type: 'buy' | 'sell';
+  type: "buy" | "sell";
 }
 
 function App() {
@@ -15,17 +16,16 @@ function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const types: Transaction['type'][] = ['buy', 'sell'];
-      const newTransaction: Transaction = {
-        id: Math.random().toString(36).substring(7),
-        userId: 'user_' + Math.random().toString(36).substring(7),
-        amount: Math.floor(Math.random() * 1000),
-        timestamp: new Date().toISOString(),
-        type: types[Math.floor(Math.random() * types.length)]
-      };
+      (async () => {
+        try {
+          const transactions = await fetchTransactions();
+          setTransactions(transactions);
+        } catch (error) {
+          console.error("Error fetching transactions:", error);
+        }
+      })();
 
-      setTransactions(prev => [newTransaction, ...prev].slice(0, 50));
-    }, 3000);
+    }, 9000);
 
     return () => clearInterval(interval);
   }, []);
@@ -42,7 +42,9 @@ function App() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <DollarSign className="w-4 h-4 text-blue-600" />
-              <span className="text-blue-600 font-medium">{currentPrice} USD</span>
+              <span className="text-blue-600 font-medium">
+                {currentPrice} USD
+              </span>
             </div>
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
               <span className="text-sm text-blue-600">JD</span>
@@ -56,14 +58,16 @@ function App() {
         {/* Transactions Panel */}
         <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Credit Trading Activity</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Credit Trading Activity
+            </h2>
             <div className="flex items-center space-x-2 text-sm text-blue-600">
               <Clock className="w-4 h-4" />
-              <span>Auto-updating every 3s</span>
+              <span>Auto-updating every 9s</span>
             </div>
           </div>
-          
-          <div className="space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar overflow-x-hidden">
             {transactions.map((tx) => (
               <div
                 key={tx.id}
@@ -71,19 +75,25 @@ function App() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
-                    <div className={`p-2 rounded-lg ${
-                      tx.type === 'buy' ? 'bg-green-50' : 'bg-red-50'
-                    }`}>
-                      <div className={`capitalize font-medium text-sm ${
-                        tx.type === 'buy' ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                    <div
+                      className={`p-2 rounded-lg ${
+                        tx.type === "buy" ? "bg-green-50" : "bg-blue-50"
+                      }`}
+                    >
+                      <div
+                        className={`capitalize font-medium text-sm ${
+                          tx.type === "buy" ? "text-green-600" : "text-blue-600"
+                        }`}
+                      >
                         {tx.type} Credits
                       </div>
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
                         <User className="w-4 h-4 text-gray-400" />
-                        <p className="text-sm font-mono text-gray-600">{tx.userId}</p>
+                        <p className="text-sm font-mono text-gray-600">
+                          {tx.userId}
+                        </p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-lg font-bold text-blue-600">
@@ -94,7 +104,9 @@ function App() {
                         </p>
                       </div>
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>{new Date(tx.timestamp).toLocaleTimeString()}</span>
+                        <span>
+                          {new Date(tx.timestamp).toLocaleTimeString()}
+                        </span>
                         <span>•</span>
                         <span className="flex items-center space-x-1">
                           <Hash className="w-4 h-4" />
@@ -104,16 +116,20 @@ function App() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t border-gray-100 hidden group-hover:block">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-500">Transaction Type:</span>
-                      <p className="font-medium text-gray-900 capitalize">{tx.type} Credits</p>
+                      <p className="font-medium text-gray-900 capitalize">
+                        {tx.type} Credits
+                      </p>
                     </div>
                     <div>
                       <span className="text-gray-500">Full Timestamp:</span>
-                      <p className="font-mono text-gray-900">{new Date(tx.timestamp).toLocaleString()}</p>
+                      <p className="font-mono text-gray-900">
+                        {new Date(tx.timestamp).toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 </div>

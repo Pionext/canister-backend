@@ -1,4 +1,3 @@
-
 import { DATABASE, Entities, TransactionSchema } from "../storage/store";
 
 export type PaginationParams = {
@@ -15,12 +14,13 @@ export type PaginatedResponse<T> = {
 };
 
 export class TransactionService {
+  static createTransaction(
+    newTransaction: TransactionSchema
+  ): TransactionSchema {
+    const currentTransactions =
+      DATABASE.get(Entities.TRANSACTION) || ([] as TransactionSchema[]);
 
-  static createTransaction(newTransaction: TransactionSchema): TransactionSchema {
-
-    const currentTransactions = DATABASE.get(Entities.TRANSACTION) || [] as TransactionSchema[];
-    
-     DATABASE.insert(Entities.TRANSACTION, [
+    DATABASE.insert(Entities.TRANSACTION, [
       ...currentTransactions,
       newTransaction,
     ]);
@@ -33,12 +33,15 @@ export class TransactionService {
   ): PaginatedResponse<TransactionSchema> {
     const { page = 1, limit = 15 } = pagination;
 
-    const allTransactions = DATABASE.get(Entities.TRANSACTION) || [] as TransactionSchema[];
+    const allTransactions =
+      DATABASE.get(Entities.TRANSACTION) || ([] as TransactionSchema[]);
 
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
 
-    const paginatedItems = allTransactions.slice(startIndex, endIndex);
+    const paginatedItems = allTransactions
+      .reverse()
+      .slice(startIndex, endIndex);
 
     const totalPages = Math.ceil(allTransactions.length / limit);
 
