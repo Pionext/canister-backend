@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { getProject, Project, projects } from "../storage/project";
-import { projectSchema } from "../validation/projectSchema";
+import { Credit, getProject, Project, projects } from "../storage/project";
+import { creditSchema, projectSchema } from "../validation/projectSchema";
 
 export const createProject = async (req: Request, res: Response) => {
   const project = req.body.project as Project;
+  const credits = req.body.credits as Credit;
   const { error, value } = projectSchema.validate(project);
 
   if (error) {
@@ -13,6 +14,25 @@ export const createProject = async (req: Request, res: Response) => {
     });
   }
 
+  if (projects.get(project.id)) {
+    res.status(409).json({
+      message: "Project already exists",
+    });
+  }
+
+  if (credits) {
+    const { error, value } = creditSchema.validate(credits);
+
+    if (error) {
+      res.status(400).json({
+        error,
+        value,
+        credits
+      });
+    }
+
+    project.credits = [credits];
+  }
   projects.insert(project.id, project);
 
   res.status(201).json({
@@ -22,24 +42,13 @@ export const createProject = async (req: Request, res: Response) => {
 };
 
 
-export const getProjectsById =  async (req: Request, res: Response) => {
+export const getProjectsById = async (req: Request, res: Response) => {
   const projectId = req.params.id;
   const project = getProject(projectId);
 
-  if(!project) res.status(404)
+  if (!project) res.status(404);
 
   res.status(200).json({
     project,
   });
-}
-
-export const getAllProjects =  async (req: Request, res: Response) => {
-  const projectId = req.params.id;
-  const project = getProject(projectId);
-
-  if(!project) res.status(401)
-
-  res.status(200).json({
-    project,
-  });
-}
+};
