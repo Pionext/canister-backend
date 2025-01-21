@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { TransactionService } from "../services/TransactionService";
+import { TransactionService } from "../services/CreditService";
 import { TransactionSchema } from "../storage/store";
 import { tradeSchema } from "../validation/tradeSchema";
 
@@ -36,3 +36,5 @@ export const createTransaction = (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error", error, body: req.body });
   }
 };
+
+

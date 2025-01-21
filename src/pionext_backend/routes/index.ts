@@ -1,10 +1,14 @@
 import { Router } from "express";
+import transactionRoute from "./creditTransaction";
+import pionextTransactionRoute from "./pionextTransaction";
 import projectRoutes from "./project";
-import transactionRoute from "./transaction";
 
 const globalRouter = Router();
 
 globalRouter.use("/projects", projectRoutes)
-globalRouter.use("/transactions", transactionRoute)
+// credit transaction routes
+globalRouter.use("/transactions/credits", transactionRoute)
+// pionext transaction routes
+globalRouter.use("/transactions/pionext", pionextTransactionRoute)
 
 export default globalRouter;

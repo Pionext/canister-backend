@@ -7,7 +7,7 @@ interface Transaction {
   userId: string;
   amount: number;
   timestamp: string;
-  type: "buy" | "sell";
+  type: "buy" | "sell" | "purchase";
 }
 
 function App() {
@@ -24,11 +24,24 @@ function App() {
           console.error("Error fetching transactions:", error);
         }
       })();
-
     }, 9000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const badgeColor = (type: string, isPionext?: boolean) => {
+    const baseColor = isPionext ? {
+      buy: "bg-purple-50 text-purple-600",
+      sell: "bg-indigo-50 text-indigo-600",
+      purchase: "bg-pink-50 text-pink-600"
+    } : {
+      buy: "bg-green-50 text-green-600",
+      sell: "bg-blue-50 text-blue-600",
+      purchase: "bg-yellow-50 text-yellow-600"
+    };
+
+    return baseColor[type as keyof typeof baseColor] || "bg-gray-50";
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -75,17 +88,9 @@ function App() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        tx.type === "buy" ? "bg-green-50" : "bg-blue-50"
-                      }`}
-                    >
-                      <div
-                        className={`capitalize font-medium text-sm ${
-                          tx.type === "buy" ? "text-green-600" : "text-blue-600"
-                        }`}
-                      >
-                        {tx.type} Credits
+                    <div className={`p-2 rounded-lg ${badgeColor(tx.type, 'isPionext' in tx)}`}>
+                      <div className="capitalize font-medium text-sm">
+                        {tx.type} {('isPionext' in tx) ? 'Pionext' : ''} Credits
                       </div>
                     </div>
                     <div className="space-y-1">
@@ -112,6 +117,12 @@ function App() {
                           <Hash className="w-4 h-4" />
                           <span>{tx.id}</span>
                         </span>
+                        {'isPionext' in tx && (
+                          <>
+                            <span>•</span>
+                            <span className="text-purple-600 font-medium">Pionext</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -122,7 +133,7 @@ function App() {
                     <div>
                       <span className="text-gray-500">Transaction Type:</span>
                       <p className="font-medium text-gray-900 capitalize">
-                        {tx.type} Credits
+                        {tx.type} {('isPionext' in tx) ? 'Pionext' : ''} Credits
                       </p>
                     </div>
                     <div>
