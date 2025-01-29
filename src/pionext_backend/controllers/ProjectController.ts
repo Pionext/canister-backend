@@ -13,12 +13,7 @@ export const createProject = async (req: Request, res: Response) => {
       value,
     });
   }
-
-  if (projects.get(project.id)) {
-    res.status(409).json({
-      message: "Project already exists",
-    });
-  }
+  const existingProject = getProject(project.id);
 
   if (credits) {
     const { error, value } = creditSchema.validate(credits);
@@ -33,10 +28,10 @@ export const createProject = async (req: Request, res: Response) => {
 
     project.credits = [credits];
   }
-  projects.insert(project.id, project);
+  projects.insert(project.id, {...existingProject, ...project});
 
   res.status(201).json({
-    message: "Project created successfully!",
+    message: `Project ${existingProject ? "updated" : "created"} successfully!`,
     project,
   });
 };
